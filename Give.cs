@@ -23,7 +23,7 @@ using CodeHatch.ItemContainer;
 namespace Oxide.Plugins
 {
     [Info("Give", "Wulf/lukespragg", "3.0.0")]
-    [Description("Allows players with permission to give items")]
+    [Description("Allows players with permission to give items or kits")]
     public class Give : CovalencePlugin
     {
         #region Configuration
