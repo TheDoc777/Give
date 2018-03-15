@@ -221,7 +221,7 @@ namespace Oxide.Plugins
 #elif RUST
         private ItemDefinition FindItem(string itemNameOrId)
         {
-            ItemDefinition itemDef = ItemManager.FindItemDefinition(itemNameOrId);
+            ItemDefinition itemDef = ItemManager.FindItemDefinition(itemNameOrId.ToLower());
             if (itemDef == null)
             {
                 int itemId;
@@ -236,7 +236,7 @@ namespace Oxide.Plugins
 
         private object GiveItem(IPlayer target, string itemNameOrId, int amount = 1, string container = "main")
         {
-            if (config.ItemBlacklist.Contains(itemNameOrId))
+            if (config.ItemBlacklist.Contains(itemNameOrId.ToLower()))
             {
                 return null;
             }
