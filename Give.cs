@@ -187,6 +187,17 @@ namespace Oxide.Plugins
         #region Item Giving
 
 #if HURTWORLD
+#if HURTWORLDITEMV2
+        private ItemGeneratorAsset FindItem(string itemNameOrId)
+        {
+            Dictionary<int, ItemGeneratorAsset> items = GlobalItemManager.Instance.ItemGenerators;
+
+            ItemGeneratorAsset item;
+            int itemId;
+            if (int.TryParse(itemNameOrId, out itemId))
+            {
+                item = items.Values.First(i => i.GeneratorId == itemId);
+#else
         private IItem FindItem(string itemNameOrId)
         {
             IItem item;
@@ -194,11 +205,16 @@ namespace Oxide.Plugins
             if (int.TryParse(itemNameOrId, out itemId))
             {
                 item = GlobalItemManager.Instance.GetItem(itemId);
+#endif
             }
             else
             {
+#if HURTWORLDITEMV2
+                item = items.Values.First(i => i.DataProvider.NameKey.ToLower().Contains(itemNameOrId.ToLower()));
+#else
                 Dictionary<int, IItem> items = GlobalItemManager.Instance.GetItems();
-                item = items.Values.FirstOrDefault(i => i.GetNameKey() == itemNameOrId || i.GetWorldPrefabName() == itemNameOrId);
+                item = items.Values.First(i => i.GetNameKey().ToLower().Contains(itemNameOrId.ToLower()));
+#endif
             }
             return item;
         }
@@ -226,7 +242,34 @@ namespace Oxide.Plugins
             }
 
             string itemName = itemNameOrId;
-#if HURTWORLD
+#if HURTWORLDITEMV2
+            PlayerSession session = target.Object as PlayerSession;
+            PlayerInventory inventory = session.WorldPlayerEntity.GetComponent<PlayerInventory>();
+            ItemGeneratorAsset generator = FindItem(itemNameOrId);
+
+            ItemObject itemObj;
+            if (generator.IsStackable())
+            {
+                itemObj = GlobalItemManager.Instance.CreateItem(generator, amount);
+                if (!inventory.GiveItemServer(itemObj))
+                {
+                    GlobalItemManager.SpawnWorldItem(itemObj, inventory);
+                }
+            }
+            else
+            {
+                int amountGiven = 0;
+                while (amountGiven < amount)
+                {
+                    itemObj = GlobalItemManager.Instance.CreateItem(generator);
+                    if (!inventory.GiveItemServer(itemObj))
+                    {
+                        GlobalItemManager.SpawnWorldItem(itemObj, inventory);
+                    }
+                    amountGiven++;
+                }
+            }
+#elif HURTWORLD
             PlayerSession session = target.Object as PlayerSession;
             PlayerInventory inventory = session.WorldPlayerEntity.GetComponent<PlayerInventory>();
             GlobalItemManager.Instance.GiveItem(session.Player, FindItem(itemNameOrId), amount);
