@@ -91,7 +91,6 @@ namespace Oxide.Plugins
             // English
             lang.RegisterMessages(new Dictionary<string, string>
             {
-                ["GiveFailed"] = "Could not give item {0}, giving failed",
                 ["GiveKitFailed"] = "Could not give kit {0} to '{1}', giving failed",
                 ["GiveKitSuccessful"] = "Giving kit {0} to '{1}' successful",
                 ["GiveToFailed"] = "Could not give item {0} to '{1}', giving failed",
@@ -104,9 +103,8 @@ namespace Oxide.Plugins
                 ["NoPlayersFound"] = "No players found with name or ID '{0}'",
                 ["PlayersFound"] = "Multiple players were found, please specify: {0}",
                 ["PlayersOnly"] = "Command '{0}' can only be used by a player",
-                ["UsageGive"] = "Usage: {0} <item id or item name> [amount]",
-                ["UsageGiveKit"] = "Usage: {0} <player name or id> <kit name>",
-                ["UsageGiveTo"] = "Usage: {0} <player name or id> <item id or short name> [amount]"
+                ["UsageGive"] = "Usage: {0} <item id or item name> [amount] [player name or id]",
+                ["UsageGiveKit"] = "Usage: {0} <kit name> [player name or id]",
             }, this);
         }
 
@@ -348,10 +346,6 @@ namespace Oxide.Plugins
                     itemContainer = basePlayer.inventory.containerBelt;
                     break;
 
-                case "wear":
-                    itemContainer = basePlayer.inventory.containerWear;
-                    break;
-
                 case "main":
                     itemContainer = basePlayer.inventory.containerMain;
                     break;
@@ -390,12 +384,6 @@ namespace Oxide.Plugins
 
         private void GiveCommand(IPlayer player, string command, string[] args)
         {
-            if (player.IsServer)
-            {
-                Message(player, "PlayersOnly", command);
-                return;
-            }
-
             if (!player.HasPermission(permGive))
             {
                 Message(player, "NotAllowed", command);
@@ -408,16 +396,36 @@ namespace Oxide.Plugins
                 return;
             }
 
-            int amount = args.Length == 2 ? Convert.ToInt32(args[1]) : 1;
+            int amount = args.Length >= 2 ? Convert.ToInt32(args[1]) : 1;
 
-            object giveItem = GiveItem(player, args[0], amount);
+            IPlayer target = null;
+            if (args.Length >= 3)
+            {
+                target = FindPlayer(args[3], player); // TODO: Join args[3]+ for when quotations aren't used
+                if (target == null && player.IsServer)
+                {
+                    Message(player, "PlayersOnly", command);
+                    return;
+                }
+            }
+
+            if (target == null)
+            {
+                target = player;
+            }
+
+            object giveItem = GiveItem(target, args[1], amount);
             if (giveItem == null)
             {
-                Message(player, "InvalidItem", args[0]);
+                Message(player, "InvalidItem", args[1]);
             }
             else if (!(bool)giveItem)
             {
-                Message(player, "GiveFailed", args[0]);
+                Message(player, "GiveToFailed", args[1], target.Name);
+            }
+            else
+            {
+                Message(player, "GiveToSuccessful", args[1], amount, target.Name);
             }
         }
 
@@ -536,41 +544,6 @@ namespace Oxide.Plugins
                 else
                 {
                     Message(player, "GiveKitSuccessful", args[1], target.Name);
-                }
-            }
-        }
-
-        private void GiveToCommand(IPlayer player, string command, string[] args)
-        {
-            if (!player.HasPermission(permGiveTo))
-            {
-                Message(player, "NotAllowed", command);
-                return;
-            }
-
-            if (args.Length < 2)
-            {
-                Message(player, "UsageGiveTo", command);
-                return;
-            }
-
-            int amount = args.Length == 3 ? Convert.ToInt32(args[2]) : 1;
-
-            IPlayer target = FindPlayer(args[0], player);
-            if (target != null)
-            {
-                object giveItem = GiveItem(target, args[1], amount);
-                if (giveItem == null)
-                {
-                    Message(player, "InvalidItem", args[1]);
-                }
-                else if (!(bool)giveItem)
-                {
-                    Message(player, "GiveToFailed", args[1], target.Name);
-                }
-                else
-                {
-                    Message(player, "GiveToSuccessful", args[1], amount, target.Name);
                 }
             }
         }

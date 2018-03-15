@@ -11,8 +11,8 @@ If the Kits plugin is installed, players can also give kits if they have the per
 ## Permissions
 
 - **give.self** -- Allows giving item(s) to self
-- **give.all** -- Allows giving item(s) to *ALL* players
-- **give.to** -- Allows giving item(s) to a specific player
+- **give.all** -- Allows giving item(s) to ***all*** players
+- **give.others** -- Allows giving item(s) to other players
 - **give.arm** -- Allows giving item(s) to player's belt ***(Reign of Kings and Rust only)***
 - **give.kit** -- Allows giving kit(s) to players ***(Kits plugin must be installed and loaded)***
 
@@ -20,9 +20,8 @@ If the Kits plugin is installed, players can also give kits if they have the per
 
 This plugin provides universal chat and console commands. When using chat commands, prefix with a forward slash: `/`.
 
-- **give `<item id or item name> [amount]`** -- Give a valid item to self
-- **giveto `<player name or id> <item id or short name> [amount]`** -- Give a valid item to specific player
-- **givekit `<player name or id> <kit name>`** -- Give an available kit to specified player
+- **give `<item id or item name> [amount] [player name or id]`** -- Give an item to self or another player
+- **givekit `<kit name> [player name or id]`** -- Give an available kit to self or another player
 
 ## Configuration
 
