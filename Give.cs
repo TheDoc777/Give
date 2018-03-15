@@ -9,11 +9,11 @@ using System.Linq;
 #if HURTWORLD
 using Assets.Scripts.Core;
 #elif REIGNOFKINGS
-using CodeHatch.Common;
 using CodeHatch.Engine.Networking;
 using CodeHatch.Inventory.Blueprints;
 using CodeHatch.Inventory.Blueprints.Components;
 using CodeHatch.ItemContainer;
+using UnityEngine;
 #endif
 
 // TODO: Add optional cooldown for commands
@@ -116,6 +116,42 @@ namespace Oxide.Plugins
 
         [PluginReference]
         private Plugin Kits;
+
+#if REIGNOFKINGS
+        private class KitData
+        {
+            public string Name;
+            public string Description;
+            public bool Enabled;
+            public string Permission;
+            public int Cooldown;
+            public int Uses;
+            public int UsesReset;
+            public int Stacks;
+            public List<KitItem> Items;
+
+            public KitData()
+            {
+                Items = new List<KitItem>();
+            }
+        }
+
+        private class KitItem
+        {
+            public string Name;
+            public int Amount;
+
+            public KitItem()
+            {
+            }
+
+            public KitItem(string name, int amount)
+            {
+                Name = name;
+                Amount = amount;
+            }
+        }
+#endif
 
         private const string permGive = "give.self";
         private const string permGiveAll = "give.all";
@@ -424,13 +460,20 @@ namespace Oxide.Plugins
                 return;
             }
 
+            // TODO: Handle giving kits to self
+
             if (args.Length < 1)
             {
                 Message(player, "UsageGiveKit", command);
                 return;
             }
 
+#if HURTWORLD || RUST
             if (!Kits.Call<bool>("isKit", args[1]))
+#elif REIGNOFKINGS
+            object kit = Kits.Call("FindKit", args[1]);
+            if (kit == null || !(bool)kit)
+#endif
             {
                 Message(player, "InvalidKit", args[1]);
                 return;
@@ -439,11 +482,11 @@ namespace Oxide.Plugins
             IPlayer target = FindPlayer(args[0], player);
             if (target != null)
             {
-                bool giveKit;
+                bool giveKit = false;
 #if REIGNOFKINGS
-                giveKit = !Kits.Call<bool>("GiveKit", target.Object as Player, args[1]);
+                giveKit = Kits.Call<bool>("GiveKit", target.Object as Player, kit);
 #elif RUST
-                giveKit = !Kits.Call<bool>("GiveKit", target.Object as BasePlayer, args[1]);
+                giveKit = Kits.Call<bool>("GiveKit", target.Object as BasePlayer, args[1]);
 #endif
                 if (!giveKit)
                 {
