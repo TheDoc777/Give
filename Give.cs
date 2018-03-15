@@ -241,19 +241,14 @@ namespace Oxide.Plugins
             switch (container.ToLower())
             {
                 case "belt":
-                    itemContainer = player.Entity.GetContainerOfType(CollectionTypes.Hotbar);
-                    break;
-
-                case "wear":
-                    // TODO: See if this is possible
+                    itemContainer = player.CurrentCharacter.Entity.GetContainerOfType(CollectionTypes.Hotbar);
                     break;
 
                 case "main":
-                    itemContainer = player.Entity.GetContainerOfType(CollectionTypes.Inventory);
+                    itemContainer = player.CurrentCharacter.Entity.GetContainerOfType(CollectionTypes.Inventory);
                     break;
             }
 
-            ItemCollection inventory = player.GetInventory().Contents; // TODO: See if can set to belt or wear
             InvItemBlueprint blueprint = InvDefinitions.Instance.Blueprints.GetBlueprintForName(itemName, true, true);
             if (blueprint == null)
             {
@@ -261,28 +256,31 @@ namespace Oxide.Plugins
             }
 
             ContainerManagement containerManagement = blueprint.TryGet<ContainerManagement>();
-            if (containerManagement != null)
+            int stackableAmount = containerManagement != null ? containerManagement.StackLimit : 0;
+            int amountGiven = 0;
+            while (amountGiven < amount)
             {
-                if (containerManagement.Stackable)
+                int amountToGive = Mathf.Min(stackableAmount, amount - amountGiven);
+                InvGameItemStack itemStack = new InvGameItemStack(blueprint, amountToGive, null);
+                if (!ItemCollection.AutoMergeAdd(itemContainer.Contents, itemStack))
                 {
-                    InvGameItemStack itemStack = new InvGameItemStack(blueprint, amount, null);
-                    if (itemContainer.Contents.AddItem(itemStack, false) != null)
+                    int stackAmount = amountToGive - itemStack.StackAmount;
+                    if (stackAmount != 0)
                     {
-                        return true;
+                        amountGiven += stackAmount;
+                    }
+                    else
+                    {
+                        break;
                     }
                 }
                 else
                 {
-                    for (int i = 1; i < amount; i++)
-                    {
-                        InvGameItemStack itemStack = new InvGameItemStack(blueprint, 1, null);
-                        itemContainer.Contents.AddItem(itemStack, false);
-                        amount--;
-                    }
-                    if (amount == 0)
-                    {
-                        return true;
-                    }
+                    amountGiven += amountToGive;
+                }
+                if (itemContainer.Contents.FreeSlotCount == 0)
+                {
+                    break;
                 }
             }
 #elif RUST
