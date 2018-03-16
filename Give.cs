@@ -115,42 +115,6 @@ namespace Oxide.Plugins
         [PluginReference]
         private Plugin Kits;
 
-#if REIGNOFKINGS
-        private class KitData
-        {
-            public string Name;
-            public string Description;
-            public bool Enabled;
-            public string Permission;
-            public int Cooldown;
-            public int Uses;
-            public int UsesReset;
-            public int Stacks;
-            public List<KitItem> Items;
-
-            public KitData()
-            {
-                Items = new List<KitItem>();
-            }
-        }
-
-        private class KitItem
-        {
-            public string Name;
-            public int Amount;
-
-            public KitItem()
-            {
-            }
-
-            public KitItem(string name, int amount)
-            {
-                Name = name;
-                Amount = amount;
-            }
-        }
-#endif
-
         private const string permGive = "give.self";
         private const string permGiveAll = "give.all";
 #if REIGNOFKINGS || RUST
@@ -503,6 +467,10 @@ namespace Oxide.Plugins
                 return;
             }
 
+#if REIGNOFKINGS
+            player.Reply($"The '{command}' command is not currently supported in Reign of Kings");
+#endif
+
             if (!player.HasPermission(permGiveKit))
             {
                 Message(player, "NotAllowed", command);
@@ -517,12 +485,7 @@ namespace Oxide.Plugins
                 return;
             }
 
-#if HURTWORLD || RUST
             if (!Kits.Call<bool>("isKit", args[1]))
-#elif REIGNOFKINGS
-            object kit = Kits.Call("FindKit", args[1]);
-            if (kit == null || !(bool)kit)
-#endif
             {
                 Message(player, "InvalidKit", args[1]);
                 return;
@@ -533,7 +496,7 @@ namespace Oxide.Plugins
             {
                 bool giveKit = false;
 #if REIGNOFKINGS
-                giveKit = Kits.Call<bool>("GiveKit", target.Object as Player, kit);
+                giveKit = Kits.Call<bool>("GiveKit", target.Object as Player, args[1]);
 #elif RUST
                 giveKit = Kits.Call<bool>("GiveKit", target.Object as BasePlayer, args[1]);
 #endif
