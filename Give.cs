@@ -401,7 +401,7 @@ namespace Oxide.Plugins
             IPlayer target = null;
             if (args.Length >= 3)
             {
-                target = FindPlayer(args[3], player); // TODO: Join args[3]+ for when quotations aren't used
+                target = FindPlayer(args[2], player); // TODO: Join args[2]+ for when quotations aren't used
                 if (target == null && player.IsServer)
                 {
                     Message(player, "PlayersOnly", command);
@@ -414,18 +414,18 @@ namespace Oxide.Plugins
                 target = player;
             }
 
-            object giveItem = GiveItem(target, args[1], amount);
+            object giveItem = GiveItem(target, args[0], amount);
             if (giveItem == null)
             {
-                Message(player, "InvalidItem", args[1]);
+                Message(player, "InvalidItem", args[0]);
             }
             else if (!(bool)giveItem)
             {
-                Message(player, "GiveToFailed", args[1], target.Name);
+                Message(player, "GiveToFailed", args[0], target.Name);
             }
             else
             {
-                Message(player, "GiveToSuccessful", args[1], amount, target.Name);
+                Message(player, "GiveToSuccessful", args[0], amount, target.Name);
             }
         }
 
