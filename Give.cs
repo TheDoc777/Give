@@ -366,9 +366,12 @@ namespace Oxide.Plugins
             if (args.Length >= 3)
             {
                 target = FindPlayer(args[2], player); // TODO: Join args[2]+ for when quotations aren't used
-                if (target == null && player.IsServer)
+                if (target == null)
                 {
-                    Message(player, "PlayersOnly", command);
+                    if (player.IsServer)
+                    {
+                        Message(player, "PlayersOnly", command);
+                    }
                     return;
                 }
             }
