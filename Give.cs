@@ -22,7 +22,7 @@ using UnityEngine;
 
 namespace Oxide.Plugins
 {
-    [Info("Give", "Wulf/lukespragg", "3.0.0")]
+    [Info("Give", "Wulf/lukespragg", "3.0.1")]
     [Description("Allows players with permission to give items or kits")]
     public class Give : CovalencePlugin
     {
@@ -50,7 +50,7 @@ namespace Oxide.Plugins
 #if RUST
 
             [JsonProperty(PropertyName = "Show popup notices (true/false)")]
-            public bool ShowPopupNotices { get; set; } = true;
+            public bool ShowPopupNotices { get; set; } = false;
 
 #endif
         }
@@ -327,6 +327,7 @@ namespace Oxide.Plugins
             {
                 target.Command("note.inv", item.info.itemid, amount);
                 target.Command("gametip.showgametip", Lang("ItemReceived", target.Id, itemName, amount));
+                timer.Once(2f, () => target.Command("gametip.hidegametip"));
             }
 #endif
             if (config.ShowChatNotices)
