@@ -12,7 +12,7 @@ If the Kits plugin is installed, players can also give kits if they have the per
 
 - `give.self` -- Allows giving item(s) to self
 - `give.all` -- Allows giving item(s) to ***all*** players
-- `give.others` -- Allows giving item(s) to other players
+- `give.to` -- Allows giving item(s) to other players
 - `give.arm` -- Allows giving item(s) to player's belt ***(Reign of Kings and Rust only)***
 - `give.kit` -- Allows giving kit(s) to players ***(Kits plugin must be installed and loaded)***
 
