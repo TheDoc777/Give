@@ -495,6 +495,35 @@ namespace Oxide.Plugins
                 return;
             }
 
+			if (args[0] == "all") {
+			
+				foreach (IPlayer targetP in players.Connected)
+				{
+					if (!targetP.IsConnected)
+					{
+						continue;
+					}
+
+					bool giveKit = false;
+#if REIGNOFKINGS
+					giveKit = Kits.Call<bool>("GiveKit", targetP.Object as Player, args[1]);
+#elif RUST
+					giveKit = Kits.Call<bool>("GiveKit", targetP.Object as BasePlayer, args[1]);
+#endif					
+
+					if (!giveKit)
+					{
+						Message(player, "GiveKitFailed", args[1], targetP.Name);
+					}
+					else
+					{
+						Message(player, "GiveKitSuccessful", args[1], targetP.Name);
+					}
+
+				}
+				return;
+			}
+
             IPlayer target = FindPlayer(args[0], player);
             if (target != null)
             {
